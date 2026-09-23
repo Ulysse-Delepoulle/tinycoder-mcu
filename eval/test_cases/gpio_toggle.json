@@ -1,0 +1,6 @@
+{
+  "name": "gpio_toggle",
+  "prompt": "Write STM32N6 C code for a function that toggles GPIO pin PA5 using the HAL library.",
+  "expected_keywords": ["HAL_GPIO_TogglePin", "GPIOA", "GPIO_PIN_5"],
+  "forbidden_patterns": ["digitalWrite", "Serial.", "Arduino"]
+}

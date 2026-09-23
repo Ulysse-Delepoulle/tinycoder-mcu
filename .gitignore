@@ -1,0 +1,26 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Third-party source docs — large and not ours to redistribute (e.g. RM0486)
+data/*.pdf
+
+# Data & artifacts (large / generated — keep the dirs via .gitkeep, ignore contents)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/dataset/*
+!data/dataset/.gitkeep
+
+# Training / eval outputs
+checkpoints/
+results/
+*.ckpt
+wandb/

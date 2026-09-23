@@ -1,0 +1,2 @@
+# Chunked doc passages (.txt/.md) go here — one passage per file.
+# build_dataset.py reads every .txt/.md file in this directory as one chunk.

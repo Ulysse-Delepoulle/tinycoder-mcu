@@ -1,0 +1,29 @@
+# Training hyperparameters, tuned to fit a single Kaggle T4 (15GB).
+
+model_name: Qwen/Qwen2.5-Coder-1.5B  # code-specialized base pulled from HuggingFace.
+
+# --- Batching ---
+batch_size: 2               # per-step batch; small because T4 VRAM is tight at seq 1024.
+gradient_accumulation: 16   # effective batch = batch_size * this = 32 (smoother gradients).
+max_seq_len: 1024           # max tokens per example (prompt + response); longer are truncated.
+
+# --- Optimization ---
+learning_rate: 2.0e-4       # high vs full fine-tuning; LoRA adapters start ~0 and need a strong signal.
+warmup_ratio: 0.05          # fraction of steps linearly warming the LR from 0 (stabilizes early steps).
+epochs: 15                  # upper bound; early stopping ends training when eval_loss plateaus.
+early_stopping_patience: 3  # stop after this many evals without eval_loss improvement (0 disables).
+
+# --- Precision (T4 = Turing: fp16 only, no bf16 hardware) ---
+fp16: true
+bf16: false
+
+gradient_checkpointing: true  # recompute activations to save VRAM (needed on a T4); ~20-30% slower.
+
+# --- I/O ---
+output_dir: /kaggle/working/checkpoints  # Kaggle's persistable output dir; override with --output-dir.
+
+# --- Logging / eval / checkpoint cadence, in optimizer steps ---
+# Sized for a small dataset (~15-75 steps); raise these for thousands of examples.
+logging_steps: 1
+eval_steps: 5
+save_steps: 5

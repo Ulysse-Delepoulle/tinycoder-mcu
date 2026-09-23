@@ -1,0 +1,7 @@
+# Local-only dependencies for scripts/build_dataset.py.
+# This runs on your CPU (laptop/desktop) to distill training data from the
+# Claude API. No GPU, no torch, no transformers needed here — that all lives
+# on Kaggle (see requirements_kaggle.txt).
+anthropic>=0.40.0
+tqdm>=4.66.0
+python-dotenv>=1.0.0

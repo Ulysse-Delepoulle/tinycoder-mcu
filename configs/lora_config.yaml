@@ -1,0 +1,17 @@
+# LoRA hyperparameters (freeze the base weights, train small low-rank adapters).
+
+# Layers that get a LoRA adapter: attention (q/k/v/o) + MLP (gate/up/down) projections.
+target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+
+r: 16                 # rank of the low-rank update; higher = more capacity + VRAM.
+lora_alpha: 32        # adapter scale = alpha/r (=2.0); alpha = 2*r is the common default.
+lora_dropout: 0.05    # light regularization against overfitting on a small dataset.
+task_type: CAUSAL_LM  # decoder-only next-token LM (GPT/Qwen-style).
+bias: none            # don't train biases; keeps the adapter tiny.

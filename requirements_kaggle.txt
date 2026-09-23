@@ -1,0 +1,18 @@
+# Packages to `pip install` INSIDE a Kaggle notebook before training.
+#
+# NOTE: torch, transformers, and datasets are already pre-installed on Kaggle
+# GPU images, so they are intentionally NOT listed here. Installing them again
+# can pull a version that mismatches Kaggle's pinned CUDA build and break things.
+#
+# peft         -> LoRA adapters (Parameter-Efficient Fine-Tuning)
+# bitsandbytes -> 4-bit NF4 quantization for QLoRA (the "Q" in QLoRA)
+# accelerate   -> device placement + mixed precision plumbing used by Trainer
+# evaluate     -> HuggingFace metrics loader (wraps rouge/bleu)
+# rouge-score  -> ROUGE-L implementation
+# sacrebleu    -> BLEU implementation
+peft>=0.13.0
+bitsandbytes>=0.44.0
+accelerate>=1.0.0
+evaluate>=0.4.0
+rouge-score>=0.1.2
+sacrebleu>=2.4.0
