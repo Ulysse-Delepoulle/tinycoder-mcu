@@ -99,6 +99,70 @@ python scripts/inference.py --checkpoint checkpoints/ --compare
 fine-tuning changed. Add `--prompt "..."` to generate one answer non-interactively
 and exit (use this in notebook cells, where the REPL can't read stdin).
 
+## Results
+
+Fine-tuned **Qwen2.5-Coder-1.5B** with 4-bit QLoRA on **162 instruction pairs**
+(146 train / 16 val) distilled from the STM32N6 reference manual (GPIO, EXTI, SPI
+chapters), on a single Kaggle T4.
+
+**Training dynamics (early stopping on eval loss).** With `epochs: 15` as an
+upper bound and patience 3, training ran to epoch 8 and restored the best
+checkpoint (epoch 5):
+
+| epoch     | 1     | 2     | 3     | 4     | 5         | 6     | 7     | 8     |
+|-----------|-------|-------|-------|-------|-----------|-------|-------|-------|
+| eval_loss | 0.906 | 0.813 | 0.770 | 0.750 | **0.738** | 0.758 | 0.794 | 0.832 |
+
+eval_loss bottomed at epoch 5, then rose while train_loss kept falling — textbook
+overfitting on a small dataset — so early stopping halted and kept the epoch-5
+adapter. (A fixed 3-epoch run reached only 0.80.)
+
+**Evaluation (best checkpoint).**
+
+| Signal      | Result                    | Notes |
+|-------------|---------------------------|-------|
+| Compilation | skipped                   | no `arm-none-eabi-gcc` on Kaggle (soft-skip by design) |
+| Functional  | 1/1                       | required HAL APIs present, no forbidden (Arduino) patterns |
+| Similarity  | ROUGE-L 0.30 / BLEU 27.2  | vs. held-out reference outputs (weak signal for code) |
+
+**Before / after — same prompt, base vs. fine-tuned.**
+
+Prompt: *"Write STM32N6 C code that toggles GPIO pin PA5 using the HAL."*
+
+Base model (no adapter) — degenerates into repetition:
+
+```
+Write STM32N6 C code that toggles GPIO pin PA5 using the HAL.	Duelassistant
+	Duelassistant
+... (repeats)
+```
+
+Fine-tuned (LoRA adapter applied):
+
+```c
+#include "stm32n6xx.h"
+
+#define GPIO_PORT    GPIOA
+#define GPIO_PIN     GPIO_PIN5
+
+void GPIO_TogglePin_PA5(void)
+{
+    /* Enable GPIOA clock (peripheral clock gating control) */
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+
+    /* Toggle the pin state */
+    GPIO_PORT->ODR ^= (1UL << GPIO_PIN);
+}
+```
+
+**Honest read.** The base is the *non-instruct* completion model, so it never
+learned to answer chat-formatted prompts and loops on the input. The fine-tune
+taught it both to follow the instruction format and to emit structured STM32 C.
+It isn't perfect: with only 146 training examples it toggles via the `ODR`
+register instead of `HAL_GPIO_TogglePin`, and can over-generate (repeated blocks
+or trailing tokens). The clear lever for improvement is **more data** (more RM
+chapters), not more epochs.
+
 ## Concepts explained
 
 New to fine-tuning? These are the ideas the code relies on.
